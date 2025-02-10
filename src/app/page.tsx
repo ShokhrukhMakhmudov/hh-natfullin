@@ -30,7 +30,7 @@ export default function TaskForm() {
     localStorage.setItem("taskFormToken", formData.token);
 
     const url =
-      `https://deadlinetaskbot.productlove.ru/api/v1/tasks/client/newhardtask?token=${formData.token}` +
+      `${process.env.NEXT_PUBLIC_API_URL}?token=${formData.token}` +
       `&title=${formData.title}` +
       `&description=${formData.description}` +
       `&tags=${formData.tags}` +
