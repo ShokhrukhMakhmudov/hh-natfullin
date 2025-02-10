@@ -13,6 +13,12 @@ export default function TaskForm() {
     deadline: "",
     reminds: "",
     allAutoResponses: false,
+    rules: {
+      budget_from: "",
+      budget_to: "",
+      qty_freelancers: "",
+      deadline_days: "",
+    },
   });
 
   useEffect(() => {
@@ -29,7 +35,7 @@ export default function TaskForm() {
     }
     localStorage.setItem("taskFormToken", formData.token);
 
-    const url =
+    let url =
       `${process.env.NEXT_PUBLIC_API_URL}?token=${formData.token}` +
       `&title=${formData.title}` +
       `&description=${formData.description}` +
@@ -40,6 +46,13 @@ export default function TaskForm() {
       `&reminds=${formData.reminds}` +
       `&all_auto_responses=${formData.allAutoResponses}`;
 
+    if (!formData.allAutoResponses) {
+      url += `&rules=${encodeURIComponent(
+        JSON.stringify({
+          ...formData.rules,
+        })
+      )}`;
+    }
     try {
       const response = await fetch(url);
       if (response.ok) {
@@ -49,6 +62,24 @@ export default function TaskForm() {
       }
     } catch (error) {
       alert("Ошибка сети!");
+    } finally {
+      setFormData({
+        token: formData.token,
+        title: "",
+        description: "",
+        tags: "",
+        budgetFrom: "",
+        budgetTo: "",
+        deadline: "",
+        reminds: "",
+        allAutoResponses: false,
+        rules: {
+          budget_from: "",
+          budget_to: "",
+          qty_freelancers: "",
+          deadline_days: "",
+        },
+      });
     }
   };
 
@@ -63,6 +94,16 @@ export default function TaskForm() {
             ? true
             : false
           : e.target.value,
+    }));
+  };
+
+  const handleRulesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      rules: {
+        ...prev.rules,
+        [e.target.name]: Number(e.target.value),
+      },
     }));
   };
 
@@ -155,6 +196,51 @@ export default function TaskForm() {
             onChange={handleChange}
           />
           <label htmlFor="allAutoResponses">Авто отклики</label>
+        </div>
+
+        <div
+          className={`${
+            formData.allAutoResponses ? "hidden" : ""
+          } flex flex-col gap-2`}>
+          <h2>Правила:</h2>
+
+          <input
+            name="budget_from"
+            type="number"
+            placeholder="Бюджет от"
+            className="input input-bordered w-full input-sm"
+            value={formData.rules?.budget_from}
+            onChange={handleRulesChange}
+            required
+          />
+          <input
+            name="budget_to"
+            type="number"
+            placeholder="Бюджет до"
+            value={formData.rules?.budget_to}
+            onChange={handleRulesChange}
+            className="input input-bordered w-full input-sm"
+            required
+          />
+          <input
+            name="deadline_days"
+            type="number"
+            placeholder="Дедлайн (дни)"
+            value={formData.rules?.deadline_days}
+            onChange={handleRulesChange}
+            className="input input-bordered w-full input-sm"
+            required
+          />
+
+          <input
+            name="qty_freelancers"
+            type="number"
+            placeholder="Кол-во фрилансеров"
+            value={formData.rules?.qty_freelancers}
+            onChange={handleRulesChange}
+            className="input input-bordered w-full input-sm"
+            required
+          />
         </div>
         <button type="submit" className="btn btn-md">
           Отправить
